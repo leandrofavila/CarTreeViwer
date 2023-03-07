@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Arvore Carregamento</title>
+    <link rel="stylesheet"  href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="tree">
+  	<ul>
+    <li>
+      <a href="#">Carregamento</a>
+      <ul>
+        <li>
+          <a href="#">Child</a>
+          <ul>
+            <li>
+              <a href="#">Grand Child</a>
+            </li><li>
+              <a href="#">Grand Child</a>
+              <ul>
+                <li>
+                  <a href="#">Grand Child</a>
+                </li><li>
+                  <a href="#">Grand Child</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li><li>
+          <a href="#">Child</a>
+          <ul>
+            <li>
+              <a href="#">Grand Child</a>
+              <ul>
+                <li>
+                  <a href="#">Grand Grand Child</a>
+                </li>
+              </ul>
+            </li><li>
+              <a href="#">Grand Child</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  </div>
+</body>
