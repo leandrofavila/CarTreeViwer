@@ -3,19 +3,37 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Arvore Carregamento</title>
+    <title>CarTree</title>
     <link rel="stylesheet"  href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-  <div class="tree">
-  	<ul>
+
+
+<div class="tree">
+  <ul>
     <li>
       <a href="#">
-      <input id="myTxtbox" type="text" value="382100">
-        </a>
+        <form action="{{ url_for('criar') }}" method="post">
+          <fieldset>
+            <div class="form-group">
+            <label for="ordem">Carregamento</label>
+            <input type="submit">
+            <textarea id="ordem" name="ordem" class="form-control" rows="1" cols="10">
+            </textarea>
+            </div>
+          </fieldset>
+        </form>
+      </a>
       <ul>
         <li>
-          <a href="#">Child</a>
+          <a href="#">
+                <tbody>
+                {% for ordem in nv_1 %}
+                <tr>
+                <td>{{ nv_1 }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+          </a>
           <ul>
             <li>
               <a href="#">Grand Child</a>
@@ -48,5 +66,3 @@
       </ul>
     </li>
   </ul>
-  </div>
-</body>
