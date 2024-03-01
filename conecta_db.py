@@ -54,16 +54,47 @@ class DB:
     def filhos(self, carregamento, ordem):
         cur = self.get_connection()
         cur.execute(
-            r"SELECT DISTINCT OPFI.NUM_ORDEM, TPL.COD_ITEM, OPPAI.DT_EMISSAO "
+            r"SELECT DISTINCT OPFI.NUM_ORDEM, TPL.COD_ITEM, OPPAI.DT_EMISSAO, OPFI.TIPO_ORDEM, OPFI.QTDE, "
+            r"LISTAGG(OP.DESCRICAO ||'  - '|| CASE WHEN MOV.ID IS NULL THEN 'PENDENTE' ELSE 'APONTADO' ||': '||MOV.QUANTIDADE END || '', '|') WITHIN GROUP (ORDER BY ROT.SEQ) "
             r"FROM FOCCO3I.TORDENS OPPAI "
             r"INNER JOIN FOCCO3I.TDEMANDAS TDE                    ON TDE.ORDEM_ID = OPPAI.ID "
             r"INNER JOIN FOCCO3I.TORDENS OPFI                     ON OPFI.ITPL_ID = TDE.ITPL_ID "
             r"INNER JOIN FOCCO3I.TSRENG_ORDENS_VINC_CAR VINC      ON VINC.ORDEM_ID = OPFI.ID "
             r"INNER JOIN FOCCO3I.TSRENGENHARIA_CARREGAMENTOS CAR  ON CAR.ID = VINC.CARERGAM_ID "
             r"INNER JOIN FOCCO3I.TITENS_PLANEJAMENTO TPL          ON TPL.ID = OPFI.ITPL_ID "
-            r"WHERE OPPAI.NUM_ORDEM IN ("+str(ordem)+") "
-            r"AND CAR.CARREGAMENTO = "+str(carregamento)+" "
+            r"INNER JOIN FOCCO3I.TORDENS_ROT ROT                  ON ROT.ORDEM_ID = OPFI.ID "
+            r"INNER JOIN FOCCO3I.TOPERACAO OP                     ON OP.ID = ROT.OPERACAO_ID "
+            r"LEFT JOIN FOCCO3I.TORDENS_MOVTO MOV                 ON MOV.TORDEN_ROT_ID = ROT.ID "
+            r"WHERE OPPAI.NUM_ORDEM IN ("+str(ordem)+") "    
+            r"AND CAR.CARREGAMENTO = "+str(carregamento)+" " 
+            r"GROUP BY OPFI.NUM_ORDEM, TPL.COD_ITEM, OPPAI.DT_EMISSAO, OPFI.TIPO_ORDEM, OPFI.QTDE "
         )
-        df = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM", "COD_ITEM", "DT_EMISSAO"])
+        df = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM", "COD_ITEM", "DT_EMISSAO", "TIPO_ORDEM", "QTDE",
+                                                   "LISTAGG"]).astype(int, errors="ignore")
         cur.close()
         return df
+
+
+
+    def pop_up(self, carregamento):
+        cur = self.get_connection()
+        cur.execute(
+            r"SELECT  "
+            r"TOR.NUM_ORDEM, "
+            r"LISTAGG(OP.DESCRICAO ||'  - '|| CASE WHEN MOV.ID IS NULL THEN 'PENDENTE' ELSE 'APONTADO' ||': '||MOV.QUANTIDADE END || '', '|') WITHIN GROUP (ORDER BY ROT.SEQ) "
+            r"FROM FOCCO3I.TORDENS TOR "
+            r"INNER JOIN FOCCO3I.TORDENS_VINC_ITPDV VINC          ON VINC.ORDEM_ID = TOR.ID "
+            r"INNER JOIN FOCCO3I.TITENS_PDV ITPDV                 ON ITPDV.ID = VINC.ITPDV_ID "
+            r"INNER JOIN FOCCO3I.TPEDIDOS_VENDA PDV               ON PDV.ID = ITPDV.PDV_ID "
+            r"INNER JOIN FOCCO3I.TORDENS_ROT ROT                  ON ROT.ORDEM_ID = TOR.ID "
+            r"INNER JOIN FOCCO3I.TOPERACAO OP                     ON OP.ID = ROT.OPERACAO_ID "
+            r"LEFT JOIN FOCCO3I.TORDENS_MOVTO MOV                 ON MOV.TORDEN_ROT_ID = ROT.ID "
+            r"LEFT JOIN FOCCO3I.TSRENG_ORDENS_VINC_CAR VINC       ON TOR.ID = VINC.ORDEM_ID "
+            r"LEFT JOIN FOCCO3I.TSRENGENHARIA_CARREGAMENTOS CAR   ON VINC.CARERGAM_ID = CAR.ID "
+            r"WHERE CAR.carregamento = "+str(carregamento)+" "
+            r"GROUP BY TOR.NUM_ORDEM,TOR.QTDE "
+        )
+        pop_up = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM", "LISTAGG"])
+        cur.close()
+        return pop_up
+
