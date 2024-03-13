@@ -1,17 +1,9 @@
 from flask import Flask, render_template, send_from_directory, url_for, request
 from conecta_db import DB
 import pandas as pd
-import re
 
 app = Flask(__name__)
 carre = DB()
-
-
-#def valida_car(carregamento_usu):
-#    if not carregamento_usu.isdigit() or re.match(str(carregamento_usu), r'^\d{4}00$'):
-#        return str(carregamento_usu)
-#    else:
-#        return 'Valor informado não corresponde a um carregamento.'
 
 
 def generate_tree(df, carregamento):
@@ -23,10 +15,9 @@ def generate_tree(df, carregamento):
                          f'title="{pop}">{row["NUM_ORDEM"]} - {row["COD_ITEM"]} - {row["QTDE"]}</a>'
             next_level_html = generate_next_level_tree(row["NUM_ORDEM"], carregamento)
             if next_level_html:
-                #tree_html += '<ul>'
                 tree_html += next_level_html
-                #tree_html += '</ul>'
                 tree_html += '</li>'
+
     tree_html += '</ul></div>'
     return tree_html
 

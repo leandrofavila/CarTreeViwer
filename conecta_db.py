@@ -98,3 +98,25 @@ class DB:
         cur.close()
         return pop_up
 
+
+    def mach_load(self):
+        cur = self.get_connection()
+        cur.execute(
+            r"SELECT  "
+            r"    MAQ.DESCRICAO, "
+            r"    COUNT(ROT.ID) OP_PENDENTES, "
+            r"    SUM(CASE WHEN MOV.QUANTIDADE IS NULL THEN TOR.QTDE ELSE (TOR.QTDE - MOV.QUANTIDADE) END ) AS PEÇAS_PENDENTES "
+            r"FROM FOCCO3I.TORDENS TOR "
+            r"    INNER JOIN FOCCO3I.TORDENS_ROT ROT                  ON ROT.ORDEM_ID = TOR.ID "
+            r"    INNER JOIN FOCCO3I.TORD_ROT_FAB_MAQ RMAQ            ON RMAQ.TORDEN_ROT_ID = ROT.ID "
+            r"    INNER JOIN FOCCO3I.TMAQUINAS MAQ                    ON MAQ.ID = RMAQ.MAQUINA_ID "
+            r"    LEFT JOIN FOCCO3I.TORDENS_MOVTO MOV                 ON MOV.TORDEN_ROT_ID = ROT.ID "
+            r"WHERE TOR.TIPO_ORDEM <> 'OFE' "
+            r"AND (MOV.ID IS NULL OR  "
+            r"        (SELECT SUM(APONT.QUANTIDADE) FROM FOCCO3I.TORDENS_MOVTO APONT "
+            r"        WHERE APONT.TORDEN_ROT_ID = ROT.ID) < TOR.QTDE) "
+            r"GROUP BY MAQ.DESCRICAO "
+        )
+        mach_load = pd.DataFrame(cur.fetchall(), columns=["MAQUINA", "OP_PENDENTES", "PECAS_PENDENTES"])
+        cur.close()
+        return mach_load
