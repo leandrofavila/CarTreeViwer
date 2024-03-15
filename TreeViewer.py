@@ -26,7 +26,8 @@ def generate_next_level_tree(num_ordem, carregamento):
     df_lv2 = pd.DataFrame(carre.filhos(carregamento, num_ordem))
     next_level_html = "<ul>"
     for _, row in df_lv2.iterrows():
-        pop = str(row["LISTAGG"]).replace('|', '\n')
+        pop_set = set(str(row["LISTAGG"]).split('|'))
+        pop = '\n'.join(pop_set)
         next_level_html += f'<li><a class="{row["TIPO_ORDEM"]}-link" href="{url_link(row["COD_ITEM"])}"title="{pop}">' \
                            f'{row["NUM_ORDEM"]} - {row["COD_ITEM"]} - {row["QTDE"]}</a>'
         next_level_html += generate_next_level_tree(row["NUM_ORDEM"], carregamento)

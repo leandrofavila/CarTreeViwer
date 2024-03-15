@@ -22,7 +22,6 @@ app.layout = html.Div([
 @app.callback(Output('graph', 'figure'), [Input('interval-component', 'n_intervals')])
 def update_graph(n_intervals):
     df_load = load_data()
-
     fig = go.Figure(data=[
         go.Bar(
             name='Ordens',
@@ -36,34 +35,12 @@ def update_graph(n_intervals):
     fig.update_layout(
         yaxis={'categoryorder': 'total descending'},
         width=1360,
-        height=800,
-        clickmode='event+select'
+        height=800
     )
     fig.update_traces(
         textfont_size=12,
         textangle=0,
         textposition="outside"
-    )
-    # Adicionando uma função JavaScript para lidar com o clique nas barras
-    fig.add_layout_image(
-        source="https://cdn4.iconfinder.com/data/icons/social-messaging-ui-color-shapes-2-free/128/social-facebook-messenger-512.png",
-        # Ícone para representar o clique
-        xref="paper", yref="paper",
-        x=1, y=1,
-        sizex=0.1, sizey=0.1,
-        opacity=0.8,
-        xanchor="right", yanchor="bottom"
-    )
-
-    # Adicionando o script JavaScript
-    fig.add_layout_image(
-        source="javascript:function handleClick(barData) {alert('Clicou em uma barra!');}",
-        # Script JavaScript para lidar com o clique nas barras
-        xref="paper", yref="paper",
-        x=1, y=1,
-        sizex=0.1, sizey=0.1,
-        opacity=0,
-        xanchor="right", yanchor="bottom"
     )
     return fig
 
