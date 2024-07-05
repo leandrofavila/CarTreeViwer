@@ -48,6 +48,7 @@ class DB:
         df = pd.DataFrame(df, columns=['COD_ITEM', 'NUM_ORDEM', 'QTDE', 'TIPO_ORDEM', 'DESC_TECNICA', 'PLANEJADOR',
                                        'NUM_ITEM'])
         df['QTDE'] = df['QTDE'].astype(int)
+        df.to_csv(f"carregamento{carregamento}.csv", index=False)
         return df
 
 
@@ -72,6 +73,7 @@ class DB:
         df = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM", "COD_ITEM", "DT_EMISSAO", "TIPO_ORDEM", "QTDE",
                                                    "LISTAGG"]).astype(int, errors="ignore")
         cur.close()
+        df.to_csv(f"dados_filhos{carregamento, ordem}.csv", index=False)
         return df
 
 
@@ -89,13 +91,16 @@ class DB:
             r"INNER JOIN FOCCO3I.TORDENS_ROT ROT                  ON ROT.ORDEM_ID = TOR.ID "
             r"INNER JOIN FOCCO3I.TOPERACAO OP                     ON OP.ID = ROT.OPERACAO_ID "
             r"LEFT JOIN FOCCO3I.TORDENS_MOVTO MOV                 ON MOV.TORDEN_ROT_ID = ROT.ID "
-            r"LEFT JOIN FOCCO3I.TSRENG_ORDENS_VINC_CAR VINC       ON TOR.ID = VINC.ORDEM_ID "
-            r"LEFT JOIN FOCCO3I.TSRENGENHARIA_CARREGAMENTOS CAR   ON VINC.CARERGAM_ID = CAR.ID "
-            r"WHERE CAR.carregamento = "+str(carregamento)+" "
-            r"GROUP BY TOR.NUM_ORDEM,TOR.QTDE "
+            r"WHERE (SELECT COUNT(CAR.ID)  "
+            r"    FROM FOCCO3I.TSRENG_ORDENS_VINC_CAR VINC       "
+            r"    INNER JOIN FOCCO3I.TSRENGENHARIA_CARREGAMENTOS CAR   ON VINC.CARERGAM_ID = CAR.ID "
+            r"    WHERE TOR.ID = VINC.ORDEM_ID "
+            r"    AND CAR.carregamento = "+str(carregamento)+") > 0 " 
+            r"GROUP BY TOR.NUM_ORDEM  "
         )
         pop_up = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM", "LISTAGG"])
         cur.close()
+        pop_up.to_csv(f"pop_up{carregamento}.csv", index=False)
         return pop_up
 
 
